@@ -1,24 +1,32 @@
 /**
  *  Copyright (c) 2023
- *  @Version    : 1.0.0
+ *  @Version    : 1.5.0
  *  @Repository : https://github.com/salarizadi/get-link
  *  @Author     : https://salarizadi.github.io
  *
  * "Link".get({
- *     removeURL: false,
- *     encode: false,
- *     started() {
+ *     fetch     : {
+ *        // fetch init options
+ *     },
+ *     removeURL : false,
+ *     encode    : false,
+ *     size      : 0, // content-length if not found in header
+ *     type      : "", // content-type if not found in header
+ *     removeURL : false,
+ *     encode    : false,
+ *     started   : function ( ) {
  *         console.log("Start")
  *     },
- *     progress: function (percent) {
+ *     progress: function ( percent ) {
  *         console.log(percent)
  *         if (percent >= 30 && percent < 90)
  *             this.stop()
  *     },
- *     success: url => {
+ *     success: function ( url ) {
  *         console.log(url)
+ *         this.remove()
  *     },
- *     failed: (type, message) => {
+ *     failed: function ( type, message ) {
  *         console.error(type + ", ", message)
  *     }
  * })
@@ -28,28 +36,36 @@ String.prototype.get = async function ( options = {} ) {
     if ( typeof options !== "object" )
         throw "Options must be objects";
 
+    const _URL_   = URL || webkitURL;
     const Options = {
+        fetch     : {},
         removeURL : true,
         encode    : false,
+        size      : 0,
+        type      : false,
         started ( ) {},
         progress ( percent ) {},
         success ( url ) {},
+        remove ( ) {
+            if ( this.blob )
+                return _URL_.revokeObjectURL(this.blob)
+        },
         stop ( ) {
             this.stopped = true
         },
         failed ( type, message ) {},
         ...options,
         link : this
-    }, _URL_ = URL || webkitURL;
+    };
 
     if (!(
-        window.fetch && window.ReadableStream && window.Blob
+        window.fetch && window.Response && window.ReadableStream && window.Blob
     )) return Options.failed("support", "This browser not support")
 
     try {
-        let Request       = await fetch(Options.link);
-        let ContentLength = Request.headers.get('content-length');
-        let ContentType   = Request.headers.get('content-type');
+        let Request       = await fetch(Options.link, typeof options.fetch === "object" ? options.fetch : {});
+        let ContentLength = Request.headers.get('content-length') ?? options.size;
+        let ContentType   = Request.headers.get('content-type') ?? options.type;
 
         if ( !ContentLength )
             return Options.failed("headers", "Not found content-length in headers");
@@ -81,9 +97,9 @@ String.prototype.get = async function ( options = {} ) {
                 if ( !Options.encode ) result = new Blob([result], {
                     type: ContentType
                 });
-                Options.success(result = _URL_.createObjectURL(result));
+                Options.success(options.blob = _URL_.createObjectURL(result));
                 if ( Options.removeURL )
-                    _URL_.revokeObjectURL(result)
+                    _URL_.revokeObjectURL(options.blob)
             } catch ( e ) {
                 Options.failed("blob", e)
             }
