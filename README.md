@@ -4,20 +4,26 @@ This library helps you to get all the links like (file, image, video, web pages,
 ## Example
 ```js
 "Link".get({
-    removeURL: false, // Delete Blob after creating it? default (true)
-    encode: false, // If it is equal to false, it does not save the file with the format, it just creates an unformatted file from the data of that file
-    started() {
+    fetch      : {
+       // fetch init options
+    },
+    removeBlob : false, // Delete Blob after creating it? default (true)
+    encode     : false, // If it is equal to false, it does not save the file with the format, it just creates an unformatted file from the data of that file
+    size       : 0,  // content-length if not found in header
+    type       : "", // content-type if not found in header
+    started    : function ( ) {
         console.log("Start")
     },
-    progress: function (percent) {
+    progress: function ( percent ) {
         console.log(percent)
         if (percent >= 30 && percent < 90)
             this.stop()
     },
-    success: url => {
+    success: function ( url ) {
         console.log(url)
+        this.remove() // Delete the generated blob
     },
-    failed: (type, message) => {
+    failed: function ( type, message ) {
         console.error(type + ", ", message)
     }
 })
@@ -26,7 +32,6 @@ This library helps you to get all the links like (file, image, video, web pages,
 ### this.stop
 This function makes it save any percentage of downloaded data, for example, you want to download an image, but you want only 30% of that image to be downloaded, for this you use this function.
 
-## Demo of the download image
 <span>30%
   <img src="https://github.com/salarizadi/get-link/assets/67143370/4b2a3b03-8811-4f98-aa92-913071156507" width="300">
 </span>
