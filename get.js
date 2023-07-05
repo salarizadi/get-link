@@ -5,16 +5,14 @@
  *  @Author     : https://salarizadi.github.io
  *
  * "Link".get({
- *     fetch     : {
+ *     fetch      : {
  *        // fetch init options
  *     },
- *     removeURL : false,
- *     encode    : false,
- *     size      : 0, // content-length if not found in header
- *     type      : "", // content-type if not found in header
- *     removeURL : false,
- *     encode    : false,
- *     started   : function ( ) {
+ *     removeBlob : false, // Delete Blob after creating it? default (true)
+ *     encode     : false, // If it is equal to false, it does not save the file with the format, it just creates an unformatted file from the data of that file
+ *     size       : 0,  // content-length if not found in header
+ *     type       : "", // content-type if not found in header
+ *     started    : function ( ) {
  *         console.log("Start")
  *     },
  *     progress: function ( percent ) {
@@ -24,7 +22,7 @@
  *     },
  *     success: function ( url ) {
  *         console.log(url)
- *         this.remove()
+ *         this.remove() // Delete the generated blob
  *     },
  *     failed: function ( type, message ) {
  *         console.error(type + ", ", message)
@@ -38,11 +36,11 @@ String.prototype.get = async function ( options = {} ) {
 
     const _URL_   = URL || webkitURL;
     const Options = {
-        fetch     : {},
-        removeURL : true,
-        encode    : false,
-        size      : 0,
-        type      : false,
+        fetch      : {},
+        removeBlob : true,
+        encode     : false,
+        size       : 0,
+        type       : false,
         started ( ) {},
         progress ( percent ) {},
         success ( url ) {},
@@ -98,7 +96,7 @@ String.prototype.get = async function ( options = {} ) {
                     type: ContentType
                 });
                 Options.success(options.blob = _URL_.createObjectURL(result));
-                if ( Options.removeURL )
+                if ( Options.removeBlob )
                     _URL_.revokeObjectURL(options.blob)
             } catch ( e ) {
                 Options.failed("blob", e)
