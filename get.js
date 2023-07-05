@@ -57,7 +57,7 @@ String.prototype.get = async function ( options = {} ) {
     };
 
     if (!(
-        window.fetch && window.Response && window.ReadableStream && window.Blob
+        fetch && Response && ReadableStream && Blob
     )) return Options.failed("support", "This browser not support")
 
     try {
@@ -92,7 +92,7 @@ String.prototype.get = async function ( options = {} ) {
             }
         })).blob().then(result => {
             try {
-                if ( !Options.encode ) result = new Blob([result], {
+                if ( Options.encode ) result = new Blob([result], {
                     type: ContentType
                 });
                 Options.success(options.blob = _URL_.createObjectURL(result));
