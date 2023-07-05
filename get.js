@@ -85,7 +85,7 @@ String.prototype.get = async function ( options = {} ) {
                 if ( Options.removeURL )
                     _URL_.revokeObjectURL(result)
             } catch ( e ) {
-                Options.failed("blob", "Failed to createObjectURL")
+                Options.failed("blob", e)
             }
         }).catch(reason => Options.failed("blob", reason));
     } catch ( e ) {Options.failed(e.name, e)}
